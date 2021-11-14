@@ -1,11 +1,12 @@
+from datetime import datetime
 from django.db import models
 from django.db.models.fields import EmailField, GenericIPAddressField
 from django.db.models.query_utils import check_rel_lookup_compatibility
 
 # Create your models here.
 GENDER =(
-    (1,'Male'),
-    (2,'Female'),
+    (1,'Pria'),
+    (2,'Wanita'),
 )
 STATUSSTAF =(
     (1,'Tetap'),
@@ -26,3 +27,5 @@ class EmployeeModel(models.Model):
 
     def __str__(self):
         return self.email
+
+    
