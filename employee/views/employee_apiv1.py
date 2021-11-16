@@ -1,3 +1,4 @@
+from copy import error
 from django.http.response import Http404, JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -60,29 +61,26 @@ class EmployeeListView(APIView):
         return Response({'result':objmodel_serializer.data,'total':total_row,'page':list_page})
 
     def post(self,request, format=None):
-        data ={
-            'fullname':request.POST.get('fullname'),
-            'email' :request.POST.get('email'), 
-            'phone' :request.POST.get('phone'),
-            'nik':request.POST.get('nik'),
-            'gender':request.POST.get('gender'),
-            'address':request.POST.get('address'),
-            'city':request.POST.get('city'),
-            'provinsi': request.POST.get('provinsi'),
-            'staf': request.POST.get('staf'),
-        }
-        email = data['email']
-        nik = data['nik']
-        objmodel =EmployeeModel.objects.filter(Q(email=email) | Q(nik=nik))
-        if(objmodel.count()) >0:
-            pesan ="Ditemukan data email atau  nik yang sudah terdafatar"
-            return Response({'pesan':pesan})
-        else:
-            obj_serializer = EmployeeSerializer(data=data)
-            if obj_serializer.is_valid():
-                obj_serializer.save()
-                return Response(obj_serializer.data,status=status.HTTP_201_CREATED)
-            return Response(obj_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        
+        # data ={
+        #     'fullname':request.POST.get('fullname'),
+        #     'email' :request.POST.get('email'), 
+        #     'phone' :request.POST.get('phone'),
+        #     'nik':request.POST.get('nik'),
+        #     'gender':request.POST.get('gender'),
+        #     'address':request.POST.get('address'),
+        #     'city':request.POST.get('city'),
+        #     'provinsi': request.POST.get('provinsi'),
+        #     'staf': request.POST.get('staf'),
+        # }
+        # email = data['email']
+        # nik = data['nik']    
+        obj_serializer = EmployeeSerializer(data=request.data)
+        if obj_serializer.is_valid():
+            obj_serializer.save()
+            return Response(obj_serializer.data,status=status.HTTP_201_CREATED)
+        return Response({'result':obj_serializer.errors},status=status.HTTP_409_CONFLICT)
+            #return Response(obj_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class EmployeeDetailView(APIView):
     def get_object(self,pk):
@@ -97,50 +95,24 @@ class EmployeeDetailView(APIView):
         return Response(seriallizer.data)
     
     def put(self, request, pk, format=None):
-        data ={
+      
+        idata ={
             'fullname':request.POST.get('fullname'),
             'email' :request.POST.get('email'), 
             'phone' :request.POST.get('phone'),
             'nik':request.POST.get('nik'),
-            'gender':request.POST.get('gender'),
-            'address':request.POST.get('address'),
-            'city':request.POST.get('city'),
-            'provinsi': request.POST.get('provinsi'),
-            'staf': request.POST.get('staf'),
+            
         }
-        objemail = data['email']
-        objnik = data['nik']
+        objemail = idata['email']
+        objnik = idata['nik']
+        objemployee = self.get_object(pk)
         
-       
-        # snippet = EmployeeModel.objects.get(pk=pk)
-        snippet = self.get_object(pk)
-        # serial = EmployeeSerializer(snippet)
-        # sf=serial.data
-        # objemail=sf['email']
-        # objnik=sf['nik']
-        objexclude = EmployeeModel.objects.filter(Q(email=objemail) | Q(nik=objnik)).exclude(pk=pk)
-        total =objexclude.count()
-        print(total)
-        if total > 0:
-            message = "Ada Data email atau nik yang sudah digunakan"
-        else:
-            message = "Proses update bisa diproses"
-            serializer = EmployeeSerializer(snippet, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = EmployeeSerializer(objemployee, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        objrow = []
-        for row in objexclude:
-            data = {
-                'id':row.id,
-                'email':row.email,
-                'nik':row.nik, 
-            }
-            objrow.append(data)
-        return Response({'total':total,'pesan':message,'digunakan':objrow})
-       
     def delete(self, request, pk, format=None):
         snippet = self.get_object(pk)
         snippet.delete()
