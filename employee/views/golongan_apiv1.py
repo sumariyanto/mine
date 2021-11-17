@@ -59,6 +59,7 @@ class GolonganDetail_Apiv1(APIView):
             data ={
                 "user":request.user.username,
                 "level":request.user.is_staff,
+                "username":request.user.username,
             }
            
         return Response(data)
