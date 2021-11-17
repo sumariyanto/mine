@@ -10,6 +10,7 @@ class BagianSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class GolonganSerializer(serializers.ModelSerializer):
+   
     golongan = serializers.CharField(max_length=35, validators=[UniqueValidator(queryset=GolonganModel.objects.all(), message="Already Use")])
     class Meta:
         model = GolonganModel

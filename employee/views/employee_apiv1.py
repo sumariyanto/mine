@@ -61,26 +61,13 @@ class EmployeeListView(APIView):
         return Response({'result':objmodel_serializer.data,'total':total_row,'page':list_page})
 
     def post(self,request, format=None):
-        
-        # data ={
-        #     'fullname':request.POST.get('fullname'),
-        #     'email' :request.POST.get('email'), 
-        #     'phone' :request.POST.get('phone'),
-        #     'nik':request.POST.get('nik'),
-        #     'gender':request.POST.get('gender'),
-        #     'address':request.POST.get('address'),
-        #     'city':request.POST.get('city'),
-        #     'provinsi': request.POST.get('provinsi'),
-        #     'staf': request.POST.get('staf'),
-        # }
-        # email = data['email']
-        # nik = data['nik']    
+           
         obj_serializer = EmployeeSerializer(data=request.data)
         if obj_serializer.is_valid():
             obj_serializer.save()
             return Response(obj_serializer.data,status=status.HTTP_201_CREATED)
         return Response({'result':obj_serializer.errors},status=status.HTTP_409_CONFLICT)
-            #return Response(obj_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+           
 
 class EmployeeDetailView(APIView):
     def get_object(self,pk):
@@ -95,18 +82,7 @@ class EmployeeDetailView(APIView):
         return Response(seriallizer.data)
     
     def put(self, request, pk, format=None):
-      
-        idata ={
-            'fullname':request.POST.get('fullname'),
-            'email' :request.POST.get('email'), 
-            'phone' :request.POST.get('phone'),
-            'nik':request.POST.get('nik'),
-            
-        }
-        objemail = idata['email']
-        objnik = idata['nik']
-        objemployee = self.get_object(pk)
-        
+        objemployee = self.get_object(pk)   
         serializer = EmployeeSerializer(objemployee, data=request.data)
         if serializer.is_valid():
             serializer.save()
