@@ -6,14 +6,14 @@ from django.db.models.query_utils import check_rel_lookup_compatibility
 
 # Create your models here.
 GENDER =(
-    (1,'Pria'),
-    (2,'Wanita'),
+    ('1','Pria'),
+    ('2','Wanita'),
 )
 STATUSSTAF =(
-    (1,'Tetap'),
-    (2,'Kontrak'),
-    (3,'Percobaan'),
-    (4,'Harian'),
+    ('1','Tetap'),
+    ('2','Kontrak'),
+    ('3','Percobaan'),
+    ('4','Harian'),
 )
    
 class GolonganModel(models.Model):
@@ -39,8 +39,8 @@ class EmployeeModel(models.Model):
     city = models.CharField(max_length=50,blank=True)
     provinsi = models.CharField(max_length=50,blank=True)
     staf= models.CharField(max_length=15,choices=STATUSSTAF)
-    golongan = models.ForeignKey(GolonganModel,on_delete=models.CASCADE,blank=True,null=True)
-    bagian = models.ForeignKey(BagianModel, on_delete=models.CASCADE, blank=True,null=True)
+    golongan = models.ForeignKey(GolonganModel,on_delete=models.CASCADE,default="1")
+    bagian = models.ForeignKey(BagianModel, on_delete=models.CASCADE,default="1")
    
 
     def __str__(self):
