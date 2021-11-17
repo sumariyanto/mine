@@ -1,5 +1,6 @@
 from datetime import datetime
 from django.db import models
+from django.db.models.deletion import CASCADE, SET_DEFAULT
 from django.db.models.fields import EmailField, GenericIPAddressField
 from django.db.models.query_utils import check_rel_lookup_compatibility
 
@@ -14,6 +15,20 @@ STATUSSTAF =(
     (3,'Percobaan'),
     (4,'Harian'),
 )
+   
+class GolonganModel(models.Model):
+    golongan=models.CharField(max_length=25, null=False, blank=False)
+    info = models.TextField(max_length=250,blank=False,null=False)
+
+    def __str__(self):
+        return self.golongan
+
+class BagianModel(models.Model):
+    bagian=models.CharField(max_length=50,blank=False,null=False)
+    info=models.TextField(max_length=250,blank=False,null=False)
+    def __str__(self):
+        return self.bagian
+
 class EmployeeModel(models.Model):
     fullname = models.CharField(max_length=50,blank=True,null=False)
     email = models.EmailField(max_length=50,blank=False,null=False)
@@ -24,8 +39,13 @@ class EmployeeModel(models.Model):
     city = models.CharField(max_length=50,blank=True)
     provinsi = models.CharField(max_length=50,blank=True)
     staf= models.CharField(max_length=15,choices=STATUSSTAF)
+    golongan = models.ForeignKey(GolonganModel,on_delete=models.CASCADE,blank=True,null=True)
+    bagian = models.ForeignKey(BagianModel, on_delete=models.CASCADE, blank=True,null=True)
+   
 
     def __str__(self):
         return self.email
 
-    
+ 
+
+  
