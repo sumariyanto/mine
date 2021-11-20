@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'contact',
     'employee',
+    'hrd',
     'rest_framework',
     'rest_auth',
     

@@ -27,7 +27,8 @@ class EmployeeSerializer(serializers.ModelSerializer):
         }
         return ({'golongan':golongan,'bagian':bagian})
             
-      
+    def create(self, validated_data):
+        return EmployeeModel.objects.create(**validated_data)
 
     class Meta:
         model = EmployeeModel
