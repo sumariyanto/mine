@@ -11,10 +11,9 @@ class EmployeeSerializer(serializers.ModelSerializer):
     email =serializers.EmailField(max_length=50, validators=[UniqueValidator(queryset=EmployeeModel.objects.all(),message="Email already used..")])
     nik =serializers.CharField(max_length=25, validators=[UniqueValidator(queryset=EmployeeModel.objects.all(),message="NIK id already used..")])
     phone =serializers.CharField(max_length=25, validators=[UniqueValidator(queryset=EmployeeModel.objects.all(),message="Phone Number already use..")])
-    staf = serializers.CharField(source="get_staf_display")
+    # staf = serializers.CharField(source="get_staf_display")
     detail= serializers.SerializerMethodField(read_only=True)
     def get_detail(self,obj):
-        
         golongan ={
             'id':obj.golongan.id if obj.golongan is not None else '',
             'golongan':obj.golongan.golongan if obj.golongan is not None else '',
@@ -27,8 +26,8 @@ class EmployeeSerializer(serializers.ModelSerializer):
         }
         return ({'golongan':golongan,'bagian':bagian})
             
-    def create(self, validated_data):
-        return EmployeeModel.objects.create(**validated_data)
+    # def create(self, validated_data):
+    #     return EmployeeModel.objects.create(**validated_data)
 
     class Meta:
         model = EmployeeModel
