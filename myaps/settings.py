@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'contact',
     'employee',
     'hrd',
+    'access',
     'rest_framework',
     'rest_auth',
     

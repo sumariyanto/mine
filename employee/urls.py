@@ -9,4 +9,5 @@ urlpatterns=[
     path('api/v1/bagian/<int:pk>',views.BagianDetail_Apiv1.as_view(),name="bagian-detail"),
     path('api/v1/golongan',views.GolonganList_Apiv1.as_view(), name='golongan'),
     path('api/v1/golongan/<int:pk>',views.GolonganDetail_Apiv1.as_view(), name="golongan-detail"),
+    
 ]

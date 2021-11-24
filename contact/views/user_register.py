@@ -1,4 +1,4 @@
-from rest_framework.serializers import Serializer
+
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from rest_framework import status
@@ -52,12 +52,13 @@ class AddRegisterUser(APIView):
         return Response({'result':serializer.data,'total':total_row,'useractive':iduser})
 
     def post(self, request, format=None):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({serializer.data}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        objserializer = UserSerializer(data=request.data)
+        if not objserializer.is_valid():
+            return Response(objserializer.errors, status=400)
+        objserializer.save()
+        return Response(objserializer.data)
+        # return Response({'result':objserializer.errors})
+      
 class DetailUser(APIView):
     def get_object(self, pk):
          try:
