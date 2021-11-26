@@ -57,8 +57,7 @@ class AddRegisterUser(APIView):
             return Response(objserializer.errors, status=400)
         objserializer.save()
         return Response(objserializer.data)
-        # return Response({'result':objserializer.errors})
-      
+       
 class DetailUser(APIView):
     def get_object(self, pk):
          try:
