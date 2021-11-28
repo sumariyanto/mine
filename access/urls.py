@@ -9,4 +9,6 @@ urlpatterns =[
    path('api/v1/spost',views.AccessPostApi.as_view(),name="post-access"),
    path('api/v1/userlist',views.UserListApi.as_view(),name='user_list'),
    path('api/v1/user-page',views.UserPage.as_view(),name='sd'),
+   path('api/v1/userpage-range',views.UserPageList.as_view(),name='page_list_user'),
+   path('api/v1/userpage-offset',views.UserPageOffset.as_view(),name='page_offset'),
 ]
