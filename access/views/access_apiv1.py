@@ -8,6 +8,7 @@ import json
 from django.db.models import Q,F
 from access.views.pagingku import listpageku, pagingku
 from django.core.paginator import InvalidPage, Paginator,EmptyPage, PageNotAnInteger
+from rest_framework.pagination import _get_displayed_page_numbers as listpage_range
 from rest_framework.pagination import *
 
 from contact.seriallizer.user_seriallizer import UserSerializer
@@ -147,7 +148,7 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_size = 2
     page_size_query_param = 'limit'
     # page_size_query_param = 'page_size'
-    max_page_size = 100
+    max_page_size = 50
     #url ?page=xx
     def get_next_link(self):
         if not self.page.has_next():
@@ -160,6 +161,20 @@ class StandardResultsSetPagination(PageNumberPagination):
             return None
         page_number = self.page.previous_page_number()
         return page_number
+   
+  
+    def get_paginated_response(self, data):  
+        return Response(OrderedDict([
+             ('pageRange',listpage_range(self.page.number,self.page.paginator.num_pages)),           
+             ('perPage',self.page.paginator.per_page),
+             ('totalPages', self.page.paginator.num_pages),
+             ('totalData', self.page.paginator.count),
+             ('currentPage', self.page.number),
+             ('nextPage', self.get_next_link()),
+             ('previousPage', self.get_previous_link()),
+             ('results', data)
+         ]))
+  
 
 class UserPageOffset(APIView):  
     pagination_class = StandardResultsSetPagination
@@ -178,8 +193,9 @@ class UserPageOffset(APIView):
         if self.paginator is None:
             return None
         return self.paginator.paginate_queryset(queryset,
-                self.request, view=self)    
-    def get_paginated_response(self, data):
+                self.request, view=self)  
+
+    def get_pagination_response(self, data):
         assert self.paginator is not None
         return self.paginator.get_paginated_response(data) 
     
@@ -194,10 +210,9 @@ class UserPageOffset(APIView):
        
         page = self.paginate_queryset(instance)
         if page is not None:
-            serializer = self.get_paginated_response(self.serializer_class(page,many=True).data)        
+            serializer = self.get_pagination_response(self.serializer_class(page,many=True).data)        
         else:
             serializer = self.serializer_class(instance, many=True) 
-       
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class UserPage(APIView):
