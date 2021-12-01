@@ -165,7 +165,7 @@ class StandardResultsSetPagination(PageNumberPagination):
   
     def get_paginated_response(self, data):  
         return Response(OrderedDict([
-             ('pageRange',listpage_range(self.page.number,self.page.paginator.num_pages)),           
+             ('pageRange',listpage_range(self.page.number,self.page.paginator.num_pages)),        
              ('perPage',self.page.paginator.per_page),
              ('totalPages', self.page.paginator.num_pages),
              ('totalData', self.page.paginator.count),
@@ -229,28 +229,29 @@ class UserPage(APIView):
         page = int(request.GET.get('page', 1))
         limit = int(request.GET.get('limit',5))
         paginator = Paginator(user_list, limit)
+       
         try:
             users = paginator.page(page)
         except PageNotAnInteger:
             users = paginator.page(1)
-        except EmptyPage:
+        # except EmptyPage:
+        except(EmptyPage, InvalidPage):
             users = paginator.page(paginator.num_pages)
-        
-        # ----------------------------------------------
-         # Get the index of the current page
+        total_page=paginator.num_pages
+        per_page=paginator.per_page
         index = users.number - 1
-        # This value is maximum index of your pages, so the last page - 1
-        max_index = len(paginator.page_range)
-        # You want a range of 7, so lets calculate where to slice the list
-        start_index =index - 3 if index >=3 else 0
-        end_index = index + 3 if index <= max_index -3 else max_index
-        page_range = list(paginator.page_range)[start_index:end_index]
-       
-        # ----------------------------------------------
-        # listpage = listpageku(page,paginator.num_pages)
+        pagess=total_row = index
+        xx =list(paginator.page_range)[index:users.end_index()]
+        nn =list(paginator.page_range)[index:total_page]
+        
+        print(nn)
+        print(xx)
+        page_range=paginator.get_elided_page_range(users.number,on_each_side=3, on_ends=2)
         serial =UserSerializer(users, many=True,context={'request':request})
         return Response({
-            
+           
+            'total_page':total_page,
+            'row_perpage':per_page,
             'total_row':total_row,
             'listpage':page_range,
             'result':serial.data,
@@ -261,33 +262,29 @@ class UserPage(APIView):
 class UserPageList(APIView):
     def get(self,request):
         limit = int(request.GET.get('limit',5))
-        offset = request.GET.get('page',1)
-       
-    
-        paginator =Paginator(User.objects.all(),limit)
-        
+        page = request.GET.get('page',1)
+        user_list = User.objects.get_queryset().order_by('id')
+        paginator =Paginator(user_list,limit)
         try:
-            page = int(offset)
-        except:
-            page =1
-        try:
-            user =paginator.page(page)
-        except (EmptyPage,InvalidPage):
-            user = paginator.page(1)
+            users = paginator.page(page)
+        except PageNotAnInteger:
+            users = paginator.page(1)
+        except EmptyPage:
+            users = paginator.page(paginator.num_pages)
         
         # Get the index of the current page
-        index = user.number - 1
+        index = users.number - 1
         # This value is maximum index of your pages, so the last page - 1
         max_index = len(paginator.page_range)
         # You want a range of 7, so lets calculate where to slice the list
         start_index =index - 3 if index >=3 else 0
         end_index = index + 3 if index <= max_index -3 else max_index
         page_range = list(paginator.page_range)[start_index:end_index]
-        next_page = user.next_page_number()
-        prev_page = user.previous_page_number()
+        next_page = users.next_page_number()
+        prev_page = users.previous_page_number()
         # Get our new page range. In the latest versions of Django page_range returns 
         # an iterator. Thus pass it to list, to make our slice possible again.
-        serial =UserSerializer(user,many=True,context={'request':request})
+        serial =UserSerializer(users,many=True,context={'request':request})
         return Response({
 
             # 'next_page':next_page,
