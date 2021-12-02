@@ -216,6 +216,18 @@ class UserPageOffset(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class UserPage(APIView):
+    # def get_next_link(self):
+    #     if not self.page.has_next():
+    #         return None
+    #     page_number = self.page.next_page_number()
+    #     return page_number
+
+    # def get_previous_link(self):
+    #     if not self.page.has_previous():
+    #         return None
+    #     page_number = self.page.previous_page_number()
+    #     return page_number
+
     def get(self,request):
         email = request.GET.get('q')
         nid = request.GET.get('id')
@@ -240,17 +252,24 @@ class UserPage(APIView):
         total_page=paginator.num_pages
         per_page=paginator.per_page
         index = users.number - 1
-        pagess=total_row = index
-        xx =list(paginator.page_range)[index:users.end_index()]
-        nn =list(paginator.page_range)[index:total_page]
-        
-        print(nn)
-        print(xx)
+        total_row = users.paginator.count
+       
+        print(users.has_next())
+        print(users.has_previous())
+
+        if users.has_previous()==True and users.has_next()==True:
+            page_next = users.next_page_number()
+            page_prev = users.previous_page_number()
+        else:
+            page_prev = None
+            page_next = None
+      
         page_range=paginator.get_elided_page_range(users.number,on_each_side=3, on_ends=2)
         serial =UserSerializer(users, many=True,context={'request':request})
         return Response({
-           
+            'next':page_next,
             'total_page':total_page,
+            'prev':page_prev,
             'row_perpage':per_page,
             'total_row':total_row,
             'listpage':page_range,

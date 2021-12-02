@@ -1,4 +1,5 @@
 
+from django.core import paginator
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from rest_framework import status
@@ -6,17 +7,17 @@ from rest_framework.response import Response
 from contact.seriallizer import *
 from django.db.models import Q,F
 from django.http import Http404
-
+from django.core.paginator import *
 
 
 class AddRegisterUser(APIView):
     def get(self,request):
         cari=request.GET.get('q')
         nid = request.GET.get('id')
-        limit = int(request.GET.get('limit',10))
+        limit = int(request.GET.get('limit',5))
         offset = int(request.GET.get('offset',0))
-
-        objmodel=User.objects.all()
+       
+        objmodel=User.objects.get_queryset().order_by('id')
         if request.user.is_authenticated:
             user = request.user
             obuser = User.objects.filter(username=user)
@@ -36,20 +37,39 @@ class AddRegisterUser(APIView):
             objmodel = objmodel.filter(id=nid)
         if cari and cari !='':
             objmodel = objmodel.filter(Q(first_name__icontains=cari))
-        total_row=objmodel.count()
-        if limit:
-            if offset:
-                if int(offset)>0:
-                    objmodel = objmodel[int(offset):int(limit)+int(offset)]
-                else:
-                    objmodel = objmodel[int(offset):int(limit)]
-            else:
-                objmodel = objmodel[0:int(limit)]
-        else: 
-            objmodel = objmodel[0:10]
-        # user = request.user
-        serializer=UserSerializer(objmodel,many=True,context={'request':request})
-        return Response({'result':serializer.data,'total':total_row,'useractive':iduser})
+        paginator=Paginator(objmodel,limit)
+
+        try:
+            users = paginator.page(offset)
+        except PageNotAnInteger:
+            users = paginator.page(1)
+        # except EmptyPage:
+        except(EmptyPage, InvalidPage):
+            users = paginator.page(paginator.num_pages)
+        total_page=paginator.num_pages
+        per_page=paginator.per_page
+        index = users.number - 1
+        total_row = users.paginator.count
+        if users.has_previous()==True and users.has_next()==True:
+            page_next = users.next_page_number()
+            page_prev = users.previous_page_number()
+        else:
+            page_prev = None
+            page_next = None
+        page_range=paginator.get_elided_page_range(users.number,on_each_side=3, on_ends=2)
+        pagination={
+                'first':users.start_index(),
+                'next':page_next,
+                'page_range':page_range,
+                'prev':page_prev,
+                'end':users.end_index(),
+            }
+           
+           
+       
+      
+        serializer=UserSerializer(users,many=True,context={'request':request})
+        return Response({'page':pagination,'result':serializer.data,'total':total_row,'useractive':iduser,})
 
     def post(self, request, format=None):
         objserializer = UserSerializer(data=request.data)
