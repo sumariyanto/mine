@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.response import Response
 from rest_framework.validators import UniqueValidator
-from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.password_validation import *
 
 
 
@@ -27,30 +27,33 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'username':{'required':False},
             'first_name':{'required': True},
-            'last_name':{'required': True}
+            'last_name':{'required': True},
+
         }
 
-    def validate(self, attrs):
-        if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Password fields didn't match."})
-        # if attrs['username'] != attrs['email']:
-        #      raise serializers.ValidationError({"username": "fields didn't match with email fileds."})
-        
-        return attrs
-
-    def create(self, validated_data):
-        try:
-            user = User.objects.create(
-                username= validated_data['email'].lower(),
-                email=validated_data['email'].lower(),
-                first_name=validated_data['first_name'],
-                last_name=validated_data['last_name']
-            )
-            
-            user.set_password(validated_data['password'])
-            return user
-       
-        except:
-            
-            raise serializers.ValidationError({"error": status.HTTP_500_INTERNAL_SERVER_ERROR})
-    
+class UserRegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True,validators=[UniqueValidator(queryset=User.objects.all(),message="Email already used..")])
+    password2 = serializers.CharField(write_only=True, required=True)
+    class Meta:
+        model = User
+        fields=['username','email','password','password2','first_name','last_name']
+        extra_kwargs={
+            'password':{'write_only':True},
+            'username':{'required':False},
+            'first_name':{'required': True},
+            'last_name':{'required': True},
+        }
+    def save(self):
+        user=User(
+            username=self.validated_data['email'].lower(),
+            email=self.validated_data['email'].lower(),
+            first_name=self.validated_data['first_name'],
+            last_name=self.validated_data['last_name']
+        )
+        password =self.validated_data['password']
+        password2 =self.validated_data['password2']
+        if password !=password2:
+            raise serializers.ValidationError({'password':'Password must be match'})
+        user.set_password(password)
+        user.save()
+        return user

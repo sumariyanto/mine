@@ -9,5 +9,6 @@ class Contact(models.Model):
     userowner = models.ForeignKey(User, on_delete=CASCADE)
     created_on = models.DateField(auto_now_add=True)
     
+    
     def __str__(self):
         return self.address

@@ -11,4 +11,6 @@ urlpatterns =[
    path('api/v1/user-page',views.UserPage.as_view(),name='sd'),
    path('api/v1/userpage-range',views.UserPageList.as_view(),name='page_list_user'),
    path('api/v1/userpage-offset',views.UserPageOffset.as_view(),name='page_offset'),
+   path('api/v1/login',views.UserLogin.as_view(),name='sdfa'),
+   path('api/v1/logout',views.UserLogout.as_view(),name='logut'),
 ]
